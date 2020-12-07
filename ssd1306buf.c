@@ -1,5 +1,5 @@
 #include "main.h"
-#include "SSD1306Lbuf.h"
+#include "ssd1306buf.h"
 
 // Screen object
 
