@@ -102,10 +102,17 @@ void ssd1306_Clean(void)
 
 void ssd1306_Update(void)
 {
-	ssd1306_WriteCommand(0xB0);
-		ssd1306_WriteCommand(0x00);
-		ssd1306_WriteCommand(0x10);
-		HAL_I2C_Mem_Write(&hi2c1,SSD1306_I2C_ADDR,0x40,1,buffer,SSD1306_WIDTH*SSD1306_HEIGHT/8,1000);
+	int i,j;
+
+
+		for(j=0;j<8;j++)
+		{
+			ssd1306_WriteCommand(0xB0+j);
+		    ssd1306_WriteCommand(0x00);
+			ssd1306_WriteCommand(0x10);
+			HAL_I2C_Mem_Write(&hi2c1,SSD1306_I2C_ADDR,0x40,1,buffer+j*128,128,1000);
+
+		}
 }
 
 void ssd1306_DrawBitmap(uint8_t* buf)
