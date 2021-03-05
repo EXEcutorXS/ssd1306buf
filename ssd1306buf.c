@@ -102,7 +102,7 @@ void ssd1306_Clean(void)
 
 void ssd1306_Update(void)
 {
-	int i,j;
+	int j;
 
 
 		for(j=0;j<8;j++)
