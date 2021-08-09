@@ -61,6 +61,7 @@ void ssd1306_GotoXY(int x, int y)
 cursor=SSD1306_WIDTH*y+x;
 }
 
+
 void ssd1306_PutRuC(char* c)
 {
 
