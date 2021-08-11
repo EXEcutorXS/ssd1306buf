@@ -5,26 +5,23 @@
 
 extern const unsigned char myFont[165][5];
 extern I2C_HandleTypeDef hi2c1;
-uint8_t buffer[SSD1306_HEIGHT*SSD1306_WIDTH/8];
-uint16_t cursor=0;
+uint8_t buffer[SSD1306_HEIGHT * SSD1306_WIDTH / 8];
+uint16_t cursor = 0;
 //
 //  Send a byte to the command register
 //
-void ssd1306_WriteCommand(uint8_t command)
-{
-	HAL_I2C_Mem_Write(&hi2c1,SSD1306_I2C_ADDR,0x00,1,&command,1,10);
+void ssd1306_WriteCommand(uint8_t command) {
+	HAL_I2C_Mem_Write(&hi2c1, SSD1306_I2C_ADDR, 0x00, 1, &command, 1, 10);
 }
-
 
 //
 //	Initialize the oled screen
 //
-void ssd1306_Init(void)
-{	
+void ssd1306_Init(void) {
 
 	// Wait for the screen to boot
 	HAL_Delay(100);
-	
+
 	/* Init LCD */
 	ssd1306_WriteCommand(0xAE); //display off
 	ssd1306_WriteCommand(0x20); //Set Memory Addressing Mode   
@@ -56,67 +53,86 @@ void ssd1306_Init(void)
 	ssd1306_WriteCommand(0xAF); //--turn on SSD1306 panel
 }
 
-void ssd1306_GotoXY(int x, int y)
-{
-cursor=SSD1306_WIDTH*y+x;
+void ssd1306_GotoXY(int x, int y) {
+	cursor = SSD1306_WIDTH * y + x;
 }
 
-
-void ssd1306_PutRuC(char* c)
-{
+void ssd1306_PutRuC(char *c) {
 
 	uint8_t pos;
-	if (*c==0xD0) pos=*(c+1)-144+101;
-	else if (*c==0xD1) pos=*(c+1)-128+149;
-	else return;
-	memcpy(buffer+cursor,&myFont[pos][0],5);
-	cursor+=5;
+	if (*c == 0xD0)
+		pos = *(c + 1) - 144 + 101;
+	else if (*c == 0xD1)
+		pos = *(c + 1) - 128 + 149;
+	else
+		return;
+	memcpy(buffer + cursor, &myFont[pos][0], 5);
+	cursor += 5;
 }
 
-
-void ssd1306_Put(char c)
-{
-	memcpy(buffer+cursor,&myFont[c-0x20][0],5);
-	cursor+=5;
+void ssd1306_Put(char c) {
+	memcpy(buffer + cursor, &myFont[c - 0x20][0], 5);
+	cursor += 5;
 }
 
-void ssd1306_PutString(char *c)
-{
+void ssd1306_PutString(char *c) {
 	while (*c) {
-		if (*c==0xD0 || *c==0xD1)
-		{
+		if (*c == 0xD0 || *c == 0xD1) {
 			ssd1306_PutRuC(c);
-			c+=2;
-		}
-		else
+			c += 2;
+		} else
 			ssd1306_Put(*c++);
 		cursor++;
 	}
 }
 
-void ssd1306_Clean(void)
-{
+void ssd1306_Clean(void) {
 	uint16_t i;
-	for (i=0;i<SSD1306_HEIGHT*SSD1306_WIDTH/8;i++)
-	buffer[i]=0;
+	for (i = 0; i < SSD1306_HEIGHT * SSD1306_WIDTH / 8; i++)
+		buffer[i] = 0;
 }
 
-void ssd1306_Update(void)
-{
+void ssd1306_Update(void) {
 	int j;
 
+	for (j = 0; j < 8; j++) {
+		ssd1306_WriteCommand(0xB0 + j);
+		ssd1306_WriteCommand(0x00);
+		ssd1306_WriteCommand(0x10);
+		HAL_I2C_Mem_Write(&hi2c1, SSD1306_I2C_ADDR, 0x40, 1, buffer + j * 128,
+				128, 1000);
 
-		for(j=0;j<8;j++)
-		{
-			ssd1306_WriteCommand(0xB0+j);
-		    ssd1306_WriteCommand(0x00);
-			ssd1306_WriteCommand(0x10);
-			HAL_I2C_Mem_Write(&hi2c1,SSD1306_I2C_ADDR,0x40,1,buffer+j*128,128,1000);
-
-		}
+	}
 }
 
-void ssd1306_DrawBitmap(uint8_t* buf)
-{
-	memcpy(buffer,buf,sizeof(buffer));
+void ssd1306_DrawBitmap(uint8_t *buf) {
+	memcpy(buffer, buf, sizeof(buffer));
+}
+
+void ssd1306_PutPixel(uint8_t x, uint8_t y) {
+	buffer[x + SSD1306_WIDTH * y] |= y % 8;
+}
+
+void ssd1306_DrawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	if (x2 - x1 > y2 - y1) {
+		for (uint8_t i = x1; i < x2 + 1; ++i) {
+			ssd1306_PutPixel(i, y1 + (y2 - y1) * (i - x1) / (x2 - x1));
+		}
+	} else {
+		for (uint8_t i = y1; i < y2 + 1; ++i) {
+			ssd1306_PutPixel(i, x1 + (x2 - x1) * (i - y1) / (y2 - y1));
+		}
+	}
+}
+
+void ssd1306_DrawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	ssd1306_DrawLine(x1, y1, x1, y2);
+	ssd1306_DrawLine(x2, y1, x2, y2);
+	ssd1306_DrawLine(x1, y1, x2, y1);
+	ssd1306_DrawLine(x1, y2, x2, y2);
+}
+
+void ssd1306_DrawFilledRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	for (uint8_t i = x1; i < x2+1; ++i)
+		ssd1306_DrawLine(i, y1, i, y2);
 }
