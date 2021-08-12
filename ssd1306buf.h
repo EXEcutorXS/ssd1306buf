@@ -21,5 +21,11 @@ void ssd1306_PutString(char *c);
 void ssd1306_Clean(void);
 void ssd1306_Update(void);
 void ssd1306_DrawBitmap(unsigned char* buf);
+void ssd1306_PutPixel(uint8_t x, uint8_t y);
+void ssd1306_DrawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+void ssd1306_DrawDottedLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+void ssd1306_DrawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+void ssd1306_DrawFilledRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+
 
 #endif

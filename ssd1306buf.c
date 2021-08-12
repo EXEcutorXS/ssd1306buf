@@ -1,5 +1,5 @@
 #include "main.h"
-#include "ssd1306buf.h"
+
 
 // Screen object
 
@@ -120,6 +120,18 @@ void ssd1306_DrawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
 		}
 	} else {
 		for (uint8_t i = y1; i < y2 + 1; ++i) {
+			ssd1306_PutPixel(i, x1 + (x2 - x1) * (i - y1) / (y2 - y1));
+		}
+	}
+}
+
+void ssd1306_DrawDottedLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	if (x2 - x1 > y2 - y1) {
+		for (uint8_t i = x1; i < x2 + 1; i+=2) {
+			ssd1306_PutPixel(i, y1 + (y2 - y1) * (i - x1) / (x2 - x1));
+		}
+	} else {
+		for (uint8_t i = y1; i < y2 + 1; i+=2) {
 			ssd1306_PutPixel(i, x1 + (x2 - x1) * (i - y1) / (y2 - y1));
 		}
 	}
