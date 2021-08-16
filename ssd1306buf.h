@@ -12,6 +12,8 @@
 // SSD1306 LCD height in pixels
 #define SSD1306_HEIGHT          64
 
+#define SSD1306_BUFFER_SIZE (SSD1306_WIDTH*SSD1306_HEIGHT/8)
+
 void ssd1306_WriteCommand(uint8_t command);
 void ssd1306_Init(void);
 void ssd1306_GotoXY(int x, int y);

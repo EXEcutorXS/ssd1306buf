@@ -110,31 +110,53 @@ void ssd1306_DrawBitmap(uint8_t *buf) {
 }
 
 void ssd1306_PutPixel(uint8_t x, uint8_t y) {
-	buffer[x + SSD1306_WIDTH * y] |= y % 8;
+	buffer[(x + (y/8)*SSD1306_WIDTH)%SSD1306_BUFFER_SIZE] |= 1 << (y % 8);
 }
 
 void ssd1306_DrawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	if (x2==x1 && y2==y1)
+		{
+		ssd1306_PutPixel(x1, y1);
+		return;
+		}
+	if(x2<x1)
+		{
+			uint8_t temp = x2;
+			x2=x1;
+			x1=temp;
+		}
+	if(y2<y1)
+			{
+				uint8_t temp = y2;
+				y2=y1;
+				y1=temp;
+			}
 	if (x2 - x1 > y2 - y1) {
 		for (uint8_t i = x1; i < x2 + 1; ++i) {
 			ssd1306_PutPixel(i, y1 + (y2 - y1) * (i - x1) / (x2 - x1));
 		}
 	} else {
 		for (uint8_t i = y1; i < y2 + 1; ++i) {
-			ssd1306_PutPixel(i, x1 + (x2 - x1) * (i - y1) / (y2 - y1));
+			ssd1306_PutPixel(x1 + (x2 - x1) * (i - y1) / (y2 - y1), i);
 		}
 	}
 }
 
 void ssd1306_DrawDottedLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	if (x2==x1 && y2==y1)
+		{
+		ssd1306_PutPixel(x1, y1);
+		return;
+		}
 	if (x2 - x1 > y2 - y1) {
-		for (uint8_t i = x1; i < x2 + 1; i+=2) {
-			ssd1306_PutPixel(i, y1 + (y2 - y1) * (i - x1) / (x2 - x1));
+			for (uint8_t i = x1; i < x2 + 1; i+=2) {
+				ssd1306_PutPixel(i, y1 + (y2 - y1) * (i - x1) / (x2 - x1));
+			}
+		} else {
+			for (uint8_t i = y1; i < y2 + 1; i+=2) {
+				ssd1306_PutPixel(x1 + (x2 - x1) * (i - y1) / (y2 - y1), i);
+			}
 		}
-	} else {
-		for (uint8_t i = y1; i < y2 + 1; i+=2) {
-			ssd1306_PutPixel(i, x1 + (x2 - x1) * (i - y1) / (y2 - y1));
-		}
-	}
 }
 
 void ssd1306_DrawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
