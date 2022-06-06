@@ -11,7 +11,7 @@ uint16_t cursor = 0;
 //  Send a byte to the command register
 //
 void ssd1306_WriteCommand(uint8_t command) {
-	HAL_I2C_Mem_Write(&hi2c1, SSD1306_I2C_ADDR, 0x00, 1, &command, 1, 10);
+	HAL_I2C_Mem_Write(&hi2c1, SSD1306_I2C_ADDR, 0x00, 1, &command, 1, 100);
 }
 
 //
